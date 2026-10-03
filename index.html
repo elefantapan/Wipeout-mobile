@@ -1,80 +1,9 @@
-<!-- WIPEOUT MOBILE + INSTALL PATCH: paste this whole block right before </body> (after your existing <script>) -->
-<style>
-#tc{position:fixed;inset:0;z-index:5;display:none;pointer-events:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#tc *{touch-action:none}
-#jz{position:absolute;left:0;top:0;width:45%;height:100%;pointer-events:auto}
-#jb,#jk{position:absolute;border-radius:50%;display:none;pointer-events:none}
-#jb{width:120px;height:120px;margin:-60px 0 0 -60px;border:3px solid rgba(255,255,255,.45);background:rgba(255,255,255,.08)}
-#jk{width:56px;height:56px;margin:-28px 0 0 -28px;background:rgba(125,249,255,.65);border:2px solid #fff}
-.tb{position:absolute;pointer-events:auto;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(30,35,80,.55);color:#fff;font:800 13px system-ui;display:flex;align-items:center;justify-content:center;text-align:center}
-.tb.on{background:rgba(91,107,255,.9)}
-#rot{display:none;position:fixed;inset:0;z-index:20;background:#0d1020;color:#ffd34d;font:800 22px system-ui;align-items:center;justify-content:center}
-@media(orientation:portrait){#rot.t{display:flex}}
-#inst{display:none;margin-top:8px;padding:10px;border:0;border-radius:10px;background:#5b6bff;color:#fff;font-weight:800;cursor:pointer}
-html,body{overscroll-behavior:none}#c{touch-action:none}
-.touch .help{display:none}.touch #list{max-height:32vh}.touch h1{font-size:20px}.touch .box{padding:10px}.touch #play{padding:10px;font-size:17px}
-.thelp{margin:8px 0 0;color:#98a2d8;font-size:12px;line-height:1.4}
-</style>
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Wipeout</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#0d1020;color:#fff;font:16px system-ui}</style></head>
+<body>Loading…
 <script>
-(()=>{
-const d=id=>document.getElementById(id);
-/* ---------- PWA / install ---------- */
-const standalone=matchMedia('(display-mode:standalone)').matches||navigator.standalone;
-if(location.protocol.startsWith('http')){
- const L=(t,o)=>{const e=document.createElement(t);Object.assign(e,o);document.head.appendChild(e)};
- L('link',{rel:'manifest',href:'manifest.webmanifest'});L('link',{rel:'apple-touch-icon',href:'icon-192.png'});
- L('meta',{name:'theme-color',content:'#0d1020'});L('meta',{name:'apple-mobile-web-app-capable',content:'yes'});L('meta',{name:'mobile-web-app-capable',content:'yes'});
- if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
-const ib=document.createElement('button');ib.id='inst';ib.textContent='📲 INSTALL APP';d('play').before(ib);
-let dp=null;
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;if(!standalone)ib.style.display='block'});
-addEventListener('appinstalled',()=>{ib.style.display='none';dp=null});
-if(!standalone&&/iphone|ipad|ipod/i.test(navigator.userAgent))ib.style.display='block';
-ib.onclick=()=>{if(dp){dp.prompt();dp.userChoice.finally(()=>{dp=null;ib.style.display='none'})}else alert('To install: tap the Share button, then "Add to Home Screen".')};
-
-/* ---------- touch controls ---------- */
-const touch=matchMedia('(pointer:coarse)').matches||/[?&]touch=1/.test(location.search);
-if(!touch)return;
-document.body.classList.add('touch');
-document.querySelector('meta[name=viewport]').content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';
-addEventListener('contextmenu',e=>e.preventDefault());
-lock=()=>{};                                   /* no pointer lock on touch */
-Object.defineProperty(document,'pointerLockElement',{get:()=>d('c'),configurable:true});
-d('play').textContent='▶ PLAY';
-const th=document.createElement('p');th.className='thelp';th.innerHTML='<b>Left stick:</b> flick in the air for tricks (hold Q / F / R for other trick sets). You auto-run. Right: JUMP (tap on landing = BHOP), SLIDE, VAULT, DASH.';d('play').before(th);
-const rot=document.createElement('div');rot.id='rot';rot.className='t';rot.textContent='🔄 Rotate your phone';document.body.appendChild(rot);
-d('play').addEventListener('click',()=>{try{const e=document.documentElement,r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e);r&&r.catch&&r.catch(()=>{})}catch(_){}try{screen.orientation.lock('landscape').catch(()=>{})}catch(_){}});
-
-const root=document.createElement('div');root.id='tc';root.innerHTML='<div id="jz"></div><div id="jb"></div><div id="jk"></div>';document.body.appendChild(root);
-const kd=(c,t)=>window.dispatchEvent(new KeyboardEvent(t,{code:c,key:c,bubbles:true}));
-/* label, key code, size, right, bottom */
-[['JUMP','Space',96,24,24],['SLIDE','KeyS',72,130,24],['VAULT','KeyV',60,24,130],['DASH','ShiftLeft',60,94,130],
- ['Q','KeyQ',56,24,200],['F','KeyF',56,90,200],['R','KeyR',56,156,200]].forEach(([l,code,s,r,b])=>{
- const e=document.createElement('div');e.className='tb';e.textContent=l;
- Object.assign(e.style,{width:s+'px',height:s+'px',right:`calc(${r}px + env(safe-area-inset-right))`,bottom:`calc(${b}px + env(safe-area-inset-bottom))`});
- const up=()=>{if(!e._on)return;e._on=0;e.classList.remove('on');kd(code,'keyup')};
- e.addEventListener('pointerdown',ev=>{ev.preventDefault();e.setPointerCapture(ev.pointerId);e._on=1;e.classList.add('on');kd(code,'keydown')});
- e.addEventListener('pointerup',up);e.addEventListener('pointercancel',up);root.appendChild(e)});
-const cb=document.createElement('div');cb.className='tb';cb.textContent='CASH OUT';let ct=0;
-Object.assign(cb.style,{top:'10px',right:'10px',width:'90px',height:'38px',borderRadius:'19px',fontSize:'12px'});
-cb.addEventListener('pointerdown',ev=>{ev.preventDefault();if(Date.now()-ct<1500){ct=0;kd('KeyX','keydown');kd('KeyX','keyup');cb.textContent='CASH OUT'}else{ct=Date.now();cb.textContent='TAP AGAIN';setTimeout(()=>{if(Date.now()-ct>=1450)cb.textContent='CASH OUT'},1500)}});
-root.appendChild(cb);
-
-/* joystick = mouse flick. Flick the stick out fast = trick in that direction. */
-const jz=d('jz'),jb=d('jb'),jk=d('jk'),R=55;let jp=null,ox=0,oy=0,arm=true;
-const mod=()=>K.KeyQ?'Q':K.KeyF?'F':K.KeyR?'R':'E';   /* no modifier held = flips (E) */
-const at=(el,x,y)=>{el.style.left=x+'px';el.style.top=y+'px'};
-jz.addEventListener('pointerdown',e=>{if(jp!==null)return;e.preventDefault();jz.setPointerCapture(e.pointerId);jp=e.pointerId;ox=e.clientX;oy=e.clientY;arm=true;jb.style.display=jk.style.display='block';at(jb,ox,oy);at(jk,ox,oy)});
-jz.addEventListener('pointermove',e=>{if(e.pointerId!==jp)return;let dx=e.clientX-ox,dy=e.clientY-oy;const m=Math.hypot(dx,dy),k=Math.min(1,R/(m||1));dx*=k;dy*=k;at(jk,ox+dx,oy+dy);const n=Math.min(1,m/R);
- if(n<.35)arm=true;else if(n>.7&&arm){arm=false;if(G&&!G.dead&&G.cool<=0){G.cool=.18;flick(mod(),Math.abs(dy)>Math.abs(dx)?(dy<0?'U':'D'):(dx<0?'L':'R'))}}});
-const jend=e=>{if(e.pointerId!==jp)return;jp=null;jb.style.display=jk.style.display='none'};
-jz.addEventListener('pointerup',jend);jz.addEventListener('pointercancel',jend);
-
-/* show controls only while playing; auto-hold D */
-const menuEl=d('menu');let was=false;
-(function tick(){const on=!!G&&menuEl.style.display==='none';root.style.display=on?'block':'none';
- if(on&&!G.dead)K.KeyD=1;else if(!on&&was)K={};
- was=on;requestAnimationFrame(tick)})();
-})();
-</script>
+Promise.all(['game.html','mobile-patch.html'].map(f=>fetch(f).then(r=>{if(!r.ok)throw new Error(f+' '+r.status);return r.text()})))
+.then(([g,p])=>{const i=g.lastIndexOf('</body>');document.open();document.write(i<0?g+p:g.slice(0,i)+p+g.slice(i));document.close()})
+.catch(e=>{document.body.textContent='Failed to load: '+e.message});
+</script></body></html>
